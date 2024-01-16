@@ -110,7 +110,8 @@ This section provides settings related to conversions and what formats should be
     },
     "Strength": {
       "DefaultSecondsPerRep": 3
-    }
+    },
+    "WorkoutTitleTemplate": "{{PelotonWorkoutTitle}} with {{PelotonInstructorName}}"
   }
 ```
 
@@ -131,12 +132,16 @@ This section provides settings related to conversions and what formats should be
 | Rowing.PreferredLapType | no | `Default` | `Conversion Tab` | The preferred [lap type to use](#lap-types). |
 | Strength | no | `null` | `Conversion Tab` | Configuration specific to Strength workouts. |
 | Strength.DefaultSecondsPerRep | no | `3` | `Conversion Tab` | For exercises that are done for time instead of reps, P2G can estimate how many reps you completed using this value. Ex. If `DefaultSecondsPerRep=3` and you do Curls for 15s, P2G will estimate you completed 5 reps. |
+| WorkoutTitleTemplate | no | `{{PelotonWorkoutTitle}} with {{PelotonInstructorName}}` | `Conversion Tab` | Allows you to customize how your workout title will appear in Garmin Connect using [Handlebars templates](https://github.com/Handlebars-Net/Handlebars.Net). [Read More...](#workout-title-templating) |
 
 ### Understanding Custom Zones
 
-Garmin Connect expects that users have a registered device and they expect users have set up their HR and Power Zones on that device. However, this presents a problem if you either A) do not have a device capable of tracking Power or B) do not have a Garmin device at all.
+Garmin Connect expects that users have a registered device and they expect users have set up their HR and Power Zones on that device. However, this presents a problem if you either:
 
-The most common scenario for Peloton users is A, where they do not own a Power capable Garmin device and therefore are not able to configure their Power Zones in Garmin Connect.  If you do not have Power or HR zones configured in Garmin Connect then you are not able to view accurate `Time In Zones` charts for a given workout.
+* A) do not have a device capable of tracking Power
+* B) do not have a Garmin device at all.
+
+The most common scenario for Peloton users is scenario `A`, where they do not own a Power capable Garmin device and therefore are not able to configure their Power Zones in Garmin Connect.  If you do not have Power or HR zones configured in Garmin Connect then you are not able to view accurate `Time In Zones` charts for a given workout.
 
 P2G provides a work around for this by optionally enriching the workout with the `Time In Zones` data with one caveat: the chart will not display the range value for the zone.
 
@@ -166,6 +171,15 @@ P2G supports several different strategies for creating Laps in Garmin Connect.  
 | Class Segments | `Class_Segments` | If the Peloton data includes Class Segment information, then laps will be created to match each segment: Warm Up, Cycling, Weights, Cool Down, etc. |
 | Distance | `Distance` | P2G will caclulate Laps based on distance for each 1mi, 1km, or 500m (for Row only) based on your distance setting in Peloton. |
 
+### Workout Title Templating
+
+Some characters are not allowed to be used in the workout titles. If you use these characters in your configuration they will automatically be replaced with `-`.  Additionally, Garmin has a limit on how long a title will be. If the title exceeds this limit (~45 characters) then the title will be truncated.
+
+The below data fields are available for use in the template:
+
+* `PelotonWorkoutTitle` - Peloton provides this usually in the form of "10 min HITT Ride"
+* `PelotonInstructorName` - Peloton provides this as the full instructors name: "Ally Love"
+
 ## Peloton Config
 
 This section provides settings related to fetching workouts from Peloton.
@@ -191,7 +205,7 @@ This section provides settings related to fetching workouts from Peloton.
 | Field      | Required | Default | UI Setting Location | Description |
 |:-----------|:---------|:--------|:--------------------|:------------|
 | Email | **yes** | `null` | `Peloton Tab` | Your Peloton email used to sign in |
-| Password | **yes** | `null` | `Peloton Tab` | Your Peloton password used to sign in |
+| Password | **yes** | `null` | `Peloton Tab` | Your Peloton password used to sign in. **Note: Does not support `\` character in password** |
 | NumWorkoutsToDownload | no | 5 | `Peloton Tab` | The default number of workouts to download. See [choosing number of workouts to download](#choosing-number-of-workouts-to-download).  Set this to `0` if you would like P2G to prompt you each time for a number to download. |
 | ExcludeWorkoutTypes | no | none | `Peloton Tab` | A comma separated list of workout types that you do not want P2G to download/convert/upload. See [example use cases](#exclude-workout-types) below. |
 
@@ -210,6 +224,7 @@ The available values are:
 
 ```json
   Cycling
+  Outdoor Cycling
   BikeBootcamp
   TreadmillRunning
   OutdoorRunning
@@ -248,7 +263,7 @@ This section provides settings related to uploading workouts to Garmin.
 | Field      | Required | Default | UI Setting Location | Description |
 |:-----------|:---------|:--------|:--------------------|:------------|
 | Email | **yes - if Upload=true** | `null` | `Garmin Tab` | Your Garmin email used to sign in |
-| Password | **yes - if Upload=true** | `null` | `Garmin Tab` | Your Garmin password used to sign in |
+| Password | **yes - if Upload=true** | `null` | `Garmin Tab` | Your Garmin password used to sign in. **Note: Does not support `\` character in password** |
 | TwoStepVerificationEnabled | no | `false` | `Garmin Tab` | Whether or not your Garmin account is protected by Two Step Verification |
 | Upload | no | `false` | `Garmin Tab` |  `true` indicates you wish downloaded workouts to be automatically uploaded to Garmin for you. |
 | FormatToUpload | no | `fit` | `Garmin Tab > Advanced` | Valid values are `fit` or `tcx`. Ensure the format you specify here is also enabled in your [Format config](#format-config) |
